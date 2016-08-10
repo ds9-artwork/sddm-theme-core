@@ -1,0 +1,16 @@
+[SddmGreeterTheme]
+Name=Plasma Light Core Theme
+Description=Plasma Light Core Theme
+Author=
+Copyright=
+License=
+Type=sddm-theme
+Version=0.1
+Website=https://github.com/plasma-extensions/sddm-theme-core
+Screenshot=res/screenshot.jpg
+MainScript=Main.qml
+ConfigFile=theme.conf
+TranslationsDirectory=translations
+Email=
+Theme-Id=sddm-core
+Theme-API=2.0

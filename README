@@ -1,0 +1,11 @@
+Install
+cd <sddm-core-theme-root-dir>
+mkdir build
+
+cd build
+cmake .. -DCMAKE_INSTALL_PREFIX=/usr 
+cmake install
+
+Test
+cd <sddm-core-theme-root-dir>
+sddm-greeter --test-mode --theme sddm-core/
