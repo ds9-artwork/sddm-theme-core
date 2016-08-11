@@ -57,17 +57,6 @@ Rectangle {
         }
     }
 
-    Background {
-        anchors.fill: parent
-        source: config.background
-        fillMode: Image.PreserveAspectCrop
-        onStatusChanged: {
-            if (status == Image.Error && source !== config.defaultBackground) {
-                source = config.defaultBackground
-            }
-        }
-    }
-
     Component {
         id: lockPage;
         LockPage {

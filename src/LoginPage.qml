@@ -12,9 +12,14 @@ FocusScope {
     id: root
     property alias model: usersList.model
 
-    Rectangle {
+    CustomComponents.NoiseBackground {
         anchors.fill: parent
-        color: "transparent"
+
+        color: "#272727"
+        gradient: Gradient {
+            GradientStop { position: 0; color: "#272727" }
+            GradientStop { position: 1; color: "#2b2b2b" }
+        }
 
         ListView {
             id: usersList
