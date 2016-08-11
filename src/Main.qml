@@ -62,11 +62,11 @@ Rectangle {
         LockPage {
             MouseArea {
                 anchors.fill: parent
-                onClicked: stack.pop();
+                onClicked: stack.push({item:loginPage, properties: {focus: true}});
             }
 
             Keys.onPressed: {
-                onClicked: stack.pop();
+                onClicked: stack.push({item:loginPage, properties: {focus: true}});
                 event.accepted = true;
             }
 
@@ -80,7 +80,7 @@ Rectangle {
             model: userModel
             Keys.onPressed: {
                 if (event.key === Qt.Key_Escape) {
-                    onClicked: stack.push({item:lockPage, properties: {focus: true}});
+                    onClicked: stack.pop();
                     event.accepted = true
                 }
             }
@@ -94,44 +94,12 @@ Rectangle {
         id: stack
         anchors.fill: parent;
 
+        initialItem: {"item": lockPage, "properties" : {"focus": "true"}}
+
         focus: true
-        delegate: StackViewDelegate {
-            function transitionFinished(properties)
-            {
-                properties.exitItem.opacity = 1
-            }
-
-            popTransition: StackViewTransition {
-                PropertyAnimation {
-                    target: exitItem
-                    property: "y"
-                    from: 0
-                    to: 0 - stack.height
+        delegate: ControlsPrivate.StackViewSlideDelegate {
+                    horizontal: false
                 }
-                PropertyAnimation {
-                    target: enterItem
-                    property: "opacity"
-                    from: 0
-                    to: 1
-                }
-            }
-
-            pushTransition: StackViewTransition {
-                PropertyAnimation {
-                    target: enterItem
-                    property: "y"
-                    from: 0 - stack.height
-                    to: 0
-                }
-
-            }
-        }
-
-        Component.onCompleted: {
-            stack.push([{"item": loginPage, "properties" : {"focus": "true"}},
-                        {"item": lockPage, "properties" : {"focus": "true"}}])
-
-        }
 
         // HACK REQUIRED TO RESTORE FOCUS TO THE TOP ITEM ON StackView Pop/Push
         onBusyChanged: {
