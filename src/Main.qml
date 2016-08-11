@@ -24,6 +24,10 @@
 
 import QtQuick 2.0
 import QtQuick.Controls 1.4
+import QtQuick.Controls.Private 1.0 as ControlsPrivate
+
+import org.kde.plasma.core 2.0 as PlasmaCore
+import org.kde.plasma.components 2.0 as PlasmaComponents
 
 import SddmComponents 2.0
 
@@ -53,12 +57,28 @@ Rectangle {
         }
     }
 
+    Background {
+        anchors.fill: parent
+        source: config.background
+        fillMode: Image.PreserveAspectCrop
+        onStatusChanged: {
+            if (status == Image.Error && source !== config.defaultBackground) {
+                source = config.defaultBackground
+            }
+        }
+    }
+
     Component {
         id: lockPage;
         LockPage {
             MouseArea {
                 anchors.fill: parent
-                onClicked: stack.push({item:loginPage, properties: {focus: true}});
+                onClicked: stack.pop();
+            }
+
+            Keys.onPressed: {
+                onClicked: stack.pop();
+                event.accepted = true;
             }
 
             // CustomComponents.FocusWatcher { target: parent }
@@ -68,10 +88,11 @@ Rectangle {
     Component {
         id: loginPage;
         LoginPage {
+            model: userModel
             Keys.onPressed: {
                 if (event.key === Qt.Key_Escape) {
-                    stack.pop()
-                    event.accepted = true;
+                    onClicked: stack.push({item:lockPage, properties: {focus: true}});
+                    event.accepted = true
                 }
             }
 
@@ -83,21 +104,50 @@ Rectangle {
     StackView {
         id: stack
         anchors.fill: parent;
-        initialItem: {"item": lockPage, "properties" : {"focus": "true"}}
 
         focus: true
-    }
+        delegate: StackViewDelegate {
+            function transitionFinished(properties)
+            {
+                properties.exitItem.opacity = 1
+            }
 
-/*
-    Background {
-        anchors.fill: parent
-        source: config.background
-        fillMode: Image.PreserveAspectCrop
-        onStatusChanged: {
-            if (status == Image.Error && source != config.defaultBackground) {
-                source = config.defaultBackground
+            popTransition: StackViewTransition {
+                PropertyAnimation {
+                    target: exitItem
+                    property: "y"
+                    from: 0
+                    to: 0 - stack.height
+                }
+                PropertyAnimation {
+                    target: enterItem
+                    property: "opacity"
+                    from: 0
+                    to: 1
+                }
+            }
+
+            pushTransition: StackViewTransition {
+                PropertyAnimation {
+                    target: enterItem
+                    property: "y"
+                    from: 0 - stack.height
+                    to: 0
+                }
+
             }
         }
-    }*/
 
+        Component.onCompleted: {
+            stack.push([{"item": loginPage, "properties" : {"focus": "true"}},
+                        {"item": lockPage, "properties" : {"focus": "true"}}])
+
+        }
+
+        // HACK REQUIRED TO RESTORE FOCUS TO THE TOP ITEM ON StackView Pop/Push
+        onBusyChanged: {
+            if (!stack.busy && stack.currentItem)
+                stack.currentItem.focus = true
+        }
+    }
 }
