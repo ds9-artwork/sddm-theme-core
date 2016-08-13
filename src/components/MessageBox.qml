@@ -42,6 +42,7 @@ RowLayout {
         id: icon
         width: units.iconSizes.small
         height: width
+        visible: icon.source ? false : true
         color: messageBox.color
     }
 
@@ -65,14 +66,14 @@ RowLayout {
     }
 
     function setInfoMessage(msg) {
-        messageBox.iconName = "dialog-information-symbolic";
+        messageBox.iconName = "dialog-information";
         messageBox.message = msg;
         messageBox.color = "#00ff00";
         messageBox.opacity = 1.0;
     }
 
     function setErrorMessage(msg) {
-        messageBox.iconName = "dialog-error-symbolic";
+        messageBox.iconName = "dialog-error";
         messageBox.message = msg;
         messageBox.color = "#a63232";
         messageBox.opacity = 1.0;

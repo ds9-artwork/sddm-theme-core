@@ -24,18 +24,17 @@
  * $END_LICENSE$
  ***************************************************************************/
 
-import QtQuick 2.0
+import QtQuick 2.3
 import org.kde.plasma.core 2.0 as PlasmaCore
 
 ListView {
     readonly property int userItemWidth: units.largeSpacing * 8
     readonly property int userItemHeight: units.largeSpacing * 8
-    readonly property int userFaceSize: units.largeSpacing * 6
+    readonly property int userFaceSize: units.largeSpacing * 10
 
     signal selected()
 
     id: usersView
-    focus: true
     spacing: units.largeSpacing * 2
     orientation: ListView.Horizontal
     highlightRangeMode: ListView.StrictlyEnforceRange
