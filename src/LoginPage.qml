@@ -1,8 +1,9 @@
 import QtQuick 2.0
-import QtQuick.Controls 1.4
-import QtQuick.Layouts 1.2
+import QtQuick.Controls 1.2
+import QtQuick.Layouts 1.0
 import QtGraphicalEffects 1.0
 
+import org.kde.plasma.core 2.0 as PlasmaCore
 import org.kde.plasma.components 2.0 as PlasmaComponents
 import SddmComponents 2.0
 
@@ -28,19 +29,30 @@ FocusScope {
         }
 
         ColumnLayout {
+            id: loginAreaContainer
             anchors.centerIn: parent
-
-            spacing: 12
+            spacing: 36
             width: 600
 
             CustomComponents.UsersView {
                 id: usersView
+
                 height: userItemHeight
+                width: userItemWidth
+
+                Layout.alignment: Qt.AlignHCenter
+
                 preferredHighlightBegin: userItemWidth * 1
                 preferredHighlightEnd: userItemWidth * 2
+
+                displayMarginBeginning: userItemWidth
+                displayMarginEnd: userItemWidth
+
+                highlightRangeMode: ListView.NoHighlightRange
+
                 onSelected: root.clearPassword()
 
-                Layout.fillWidth: true
+                // CustomComponents.FocusWatcher{}
             }
 
             CustomComponents.HawaiiLabel {
@@ -51,48 +63,43 @@ FocusScope {
                 horizontalAlignment: Qt.AlignHCenter
 
                 Layout.fillWidth: true
+                // CustomComponents.FocusWatcher{}
             }
 
             CustomComponents.HawaiiPasswordField {
                 id: passwordField
-                width: 300
-                onAccepted: root.loginRequested(usersView.currentItem.userName,
-                                                passwordField.text)
+                Layout.alignment: Qt.AlignHCenter
 
+                focus: true
+                // onAccepted: root.startLogin() // onAccepted is forwarded and handled at the root item
+                Keys.forwardTo: [root, usersView]
+            }
+
+/*
+            Label {
+                id: capsLockWarning
+                text: i18nd("plasma_lookandfeel_org.kde.lookandfeel","Caps Lock is on")
+                visible: keystateSource.data["Caps Lock"]["Locked"]
+
+                //Layout.fillWidth: true
+                Layout.alignment: Qt.AlignHCenter
+
+                font.weight: Font.Bold
+                color: "yellow"
+
+                PlasmaCore.DataSource {
+                    id: keystateSource
+                    engine: "keystate"
+                    connectedSources: "Caps Lock"
+                }
+            }*/
+
+            CustomComponents.MessageBox {
+                id: messageBox
+
+                Layout.fillWidth: true
                 Layout.alignment: Qt.AlignHCenter
             }
-
-            RowLayout {
-                id: details
-                spacing: units.largeSpacing
-
-                CustomComponents.MessageBox {
-                    id: messageBox
-                }
-
-                Item {
-                    Layout.fillWidth: true
-                }
-
-                Loader {
-                    sourceComponent: root.actions
-
-                    Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
-                }
-            }
-        }
-
-        PlasmaComponents.Label {
-            id: loginUserText
-            anchors {
-                top: usersList.bottom
-                topMargin: 12
-                horizontalCenter: loginUserPicture.horizontalCenter
-            }
-
-            text: usersList.currentItem.name
-            color: "white"
-            font.pointSize: 20
         }
 
         RowLayout {
@@ -103,7 +110,7 @@ FocusScope {
                 bottomMargin: 24
             }
 
-            spacing: 8
+            spacing: 12
 
             PlasmaComponents.ComboBox {
                 id: sessionCombo
@@ -114,6 +121,9 @@ FocusScope {
                 textRole: "name"
 
                 anchors.left: parent.left
+
+                KeyNavigation.backtab: passwordField
+                KeyNavigation.tab: layoutBox
             }
 
             LayoutBox {
@@ -123,7 +133,7 @@ FocusScope {
                 font.pixelSize: 14
 
                 arrowIcon: "res/img/angle-down.png"
-                KeyNavigation.backtab: layoutBox
+                KeyNavigation.backtab: sessionCombo
                 KeyNavigation.tab: btnReboot
             }
 
@@ -140,6 +150,12 @@ FocusScope {
                 KeyNavigation.tab: btnShutdown
             }
 
+            ColorOverlay {
+                anchors.fill: btnReboot
+                source: btnReboot
+                color: "lightgray"
+            }
+
             ImageButton {
                 id: btnShutdown
                 height: parent.height - 2
@@ -149,13 +165,60 @@ FocusScope {
                 onClicked: sddm.powerOff()
 
                 KeyNavigation.backtab: btnReboot
-                KeyNavigation.tab: prevUser
+                KeyNavigation.tab: passwordField
 
-                Component.onCompleted: {
-                    for (var k in btnShutdown)
-                        print(k, btnShutdown.k)
-                }
+                smooth: true
+            }
+
+            ColorOverlay {
+                anchors.fill: btnShutdown
+                source: btnShutdown
+                color: "lightgray"
             }
         }
+    }
+
+    Connections {
+        target: sddm
+        onLoginFailed: {
+            //Re-enable button and textfield
+            passwordField.enabled = true
+            passwordField.selectAll()
+            passwordField.forceActiveFocus()
+            setErrorMessage(textConstants.loginFailed)
+        }
+    }
+
+    function startLogin() {
+        print("Login user")
+        var username = usersView.currentItem.userName
+        var password = passwordField.text
+        var session = sessionCombo.currentIndex
+
+        //Disable button and textfield while password check is running
+        passwordField.enabled = false
+        setInfoMessage(i18n("Verifying credentials"))
+
+        //Clear notification in case the notificationResetTimer hasn't expired yet
+        // mainItem.notification = ""
+        sddm.login(username, password, session)
+    }
+
+    function clearPassword() {
+        passwordField.selectAll()
+        passwordField.forceActiveFocus()
+    }
+
+    function setInfoMessage(msg) {
+        messageBox.setInfoMessage(msg)
+    }
+
+    function setErrorMessage(msg) {
+        messageBox.setErrorMessage(msg)
+    }
+
+    Keys.onPressed: {
+        if (event.key == Qt.Key_Enter || event.key == Qt.Key_Return)
+            root.startLogin()
     }
 }

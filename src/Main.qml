@@ -23,7 +23,7 @@
 ***************************************************************************/
 
 import QtQuick 2.0
-import QtQuick.Controls 1.4
+import QtQuick.Controls 1.2
 import QtQuick.Controls.Private 1.0 as ControlsPrivate
 
 import org.kde.plasma.core 2.0 as PlasmaCore
