@@ -1,0 +1,13 @@
+Source: sddm-theme-core
+Section: unknown
+Priority: optional
+Maintainer: Rohan Garg <rohan@kde.org>
+Build-Depends: debhelper (>=9), cmake
+Standards-Version: 3.9.8
+Homepage: https://github.com/ds9-artwork/sddm-theme-core
+
+Package: sddm-theme-core
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: sddm theme for Netrunner Core
+ This package contains the files for sddm-theme-core
