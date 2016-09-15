@@ -1,2 +1,2 @@
-# sddm-theme-core
-Adjust Original Maui theme to work nicelyon current Plasma
+# sddm-theme-pss
+Adjust Original PSS theme to work nicely on current Plasma
